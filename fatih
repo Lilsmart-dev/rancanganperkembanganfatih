@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelacak Harian Perkembangan Anak</title>
+    <style>
+        /* General body styling */
+        body { 
+            font-family: 'Inter', sans-serif; /* Using Inter font as per instructions */
+            background-color: #f4f7f6; 
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            min-height: 100vh;
+        }
+        /* Main container for the application */
+        .container { 
+            max-width: 800px; 
+            width: 100%; /* Make it fluid */
+            margin: 20px auto; 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+        }
+        /* Headings styling */
+        h1, h2 { 
+            color: #2c3e50; 
+            border-bottom: 2px solid #3498db; 
+            padding-bottom: 10px; 
+            margin-top: 20px; 
+        }
+        /* Header information block */
+        .header-info { 
+            background-color: #eaf6ff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border-left: 5px solid #3498db; 
+        }
+        .header-info p { 
+            margin: 5px 0; 
+            font-size: 16px; 
+        }
+        .header-info strong { 
+            color: #2980b9; 
+        }
+        /* Daily routine visual grid */
+        .daily-routine { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+        .routine-item { 
+            background-color: #ecf0f1; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            text-align: center; 
+        }
+        .routine-item span { 
+            display: block; 
+            font-weight: bold; 
+            color: #2c3e50; 
+        }
+        .routine-item small { 
+            color: #7f8c8d; 
+            font-size: 0.85em;
+        }
+        /* Activity card styling */
+        .activity-card { 
+            background: #fdfdfd; 
+            border: 1px solid #dfe6e9; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+        }
+        .activity-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05); 
+        }
+        .activity-card h3 { 
+            margin: 0 0 10px; 
+            font-size: 20px; 
+            color: #2980b9; 
+            border-bottom: 1px dashed #bdc3c7; 
+            padding-bottom: 5px; 
+        }
+        /* Form input styling */
+        .form-input { 
+            margin-top: 15px; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-input label { 
+            font-weight: bold; 
+            display: block; 
+        }
+        .form-input input[type="date"],
+        .form-input input[type="number"], 
+        .form-input textarea { 
+            width: calc(100% - 18px); /* Adjust for padding and border */
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+        .form-input .level-radio-group {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .form-input .level-radio-group label {
+            font-weight: normal; /* Override bold for radio labels */
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .form-input button { 
+            background-color: #3498db; 
+            color: white; 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            align-self: flex-start; /* Align button to start */
+            transition: background-color 0.2s ease;
+        }
+        .form-input button:hover {
+            background-color: #2980b9;
+        }
+        /* Chart container styling */
+        #chart-container-global { 
+            margin-top: 30px; 
+            padding: 20px; 
+            background-color: #f9f9f9; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+        }
+        .chart-date-range-picker {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            align-items: center;
+            gap: 10px;
+        }
+        .chart-date-range-picker label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .chart-date-range-picker input[type="date"] {
+            width: 150px; /* Fixed width for date inputs */
+        }
+
+        /* Styles for buttons and AI summary (from user's snippet) */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .sm\:flex-row { /* Tailwind equivalent for small screens */
+            flex-direction: column; /* Default for small */
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .sm\:flex-row { flex-direction: row; }
+        }
+        .gap-4 { gap: 1rem; /* 16px */ }
+        .mb-8 { margin-bottom: 2rem; /* 32px */ }
+        .mb-10 { margin-bottom: 2.5rem; /* 40px */ }
+        .btn-primary {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+        .btn-danger {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626; /* red-600 */
+        }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .rounded-md { border-radius: 0.375rem; /* 6px */ }
+        .text-lg { font-size: 1.125rem; /* 18px */ }
+        .font-semibold { font-weight: 600; }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
+        .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); }
+        .focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
+        .focus\:ring-2:focus { box-shadow: 0 0 0 2px currentColor; } /* Simpler ring effect */
+        .focus\:ring-blue-500:focus { color: #3b82f6; } /* Use color property to enable ring on current color */
+        .focus\:ring-red-500:focus { color: #ef4444; }
+
+        .mr-2 { margin-right: 0.5rem; }
+        .section-header {
+            background-color: #e0f2f7; /* Light blue */
+            border-left: 8px solid #00acc1; /* Darker teal for accent */
+            color: #263238; /* Dark text */
+        }
+        .rounded-tr-lg { border-top-right-radius: 0.5rem; }
+        .rounded-br-lg { border-bottom-right-radius: 0.5rem; }
+        .min-h-\[300px\] { min-height: 300px; }
+        .lg\:min-h-\[400px\] { /* Tailwind equivalent for large screens */
+             min-height: 300px; /* Default for medium */
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .lg\:min-h-\[400px\] { min-height: 400px; }
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-600 { color: #4b5563; }
+        .mt-4 { margin-top: 1rem; }
+        
+        /* AI Summary Output */
+        #aiSummaryOutput {
+            background-color: #f0fdf4; /* light green */
+            border: 1px solid #a7f3d0; /* green border */
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+        }
+        #aiSummaryOutput h3 {
+            color: #047857; /* darker green */
+            margin-top: 0;
+            border-bottom: 1px dashed #d1fae5;
+            padding-bottom: 10px;
+        }
+        #summaryText {
+            color: #10b981; /* green text */
+            font-style: italic;
+        }
+
+        /* Custom Message Box Styles */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .message-box-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .message-box-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .message-box-content h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.5em;
+            border-bottom: none; /* Override default heading border */
+        }
+        .message-box-content p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .message-box-actions button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        .message-box-actions .ok-btn, .message-box-actions .confirm-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+        .message-box-actions .ok-btn:hover, .message-box-actions .confirm-btn:hover {
+            background-color: #2980b9;
+        }
+        .message-box-actions .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+        .message-box-actions .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Loading Overlay Styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            margin-top: 15px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            .daily-routine { grid-template-columns: 1fr; } /* Stack routine items on small screens */
+            .form-input input[type="date"],
+            .form-input input[type="number"], 
+            .form-input textarea { width: 100%; }
+            .chart-date-range-picker {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .chart-date-range-picker input[type="date"] {
+                width: calc(100% - 18px); /* Make date inputs full width */
+            }
+            .sm\:flex-row { flex-direction: column; } /* Override for small screens */
+            .btn-primary, .btn-danger { width: 100%; } /* Full width buttons */
+        }
+    </style>
+    <!-- Chart.js CDN for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Pelacak Harian Perkembangan Anak</h1>
+        <div class="header-info">
+            <p><strong>Nama:</strong> M. Alfatih Raindra</p>
+            <p><strong>Usia:</strong> 15 bulan</p>
+            <p><strong>Jenis Kelamin:</strong> Laki-laki</p>
+            <p><strong>Diagnosis:</strong> Tidak ada, perkembangan wajar</p>
+            <p><strong>Fokus Stimulasi:</strong> Motorik kasar, motorik halus, bahasa awal, makan mandiri, interaksi sosial</p>
+        </div>
+
+        <h2>🗓️ Rutinitas Harian Visual (Umum)</h2>
+        <div class="daily-routine">
+            <div class="routine-item"><span>☀️ Pagi</span><small>Stimulasi motorik kasar & sensoris (merangkak, berdiri di pegangan)</small></div>
+            <div class="routine-item"><span>🍲 Menjelang Siang</span><small>Latihan makan sendiri dengan sendok</small></div>
+            <div class="routine-item"><span>🎵 Sore</span><small>Permainan interaktif (lagu gerak, peek-a-boo)</small></div>
+            <div class="routine-item"><span>📚 Malam</span><small>Membaca buku bergambar + latihan menunjuk</small></div>
+            <div class="routine-item"><span>🛁 Pagi/Malam</span><small>Mandi sambil stimulasi kata</small></div>
+            <div class="routine-item"><span>🖐️ Sepanjang hari</span><small>Responsif gesture & kontak mata</small></div>
+        </div>
+
+        <h2>Daftar Aktivitas Stimulasi</h2>
+
+        <!-- Global date input for all activities -->
+        <div class="activity-card" style="background-color: #f0f8ff; border-left: 5px solid #3498db;">
+            <h3>Pilih Tanggal Entri Data</h3>
+            <div class="form-input">
+                <label for="recordDate">Tanggal:</label>
+                <input type="date" id="recordDate" class="activity-date-input">
+            </div>
+        </div>
+
+        <!-- Activity Cards based on user's new list -->
+        <div class="activity-card" id="activity1">
+            <h3>1. Latihan Berdiri & Merambat</h3>
+            <p><strong>Kategori:</strong> Motorik Kasar, Sensoris Integrasi</p>
+            <p><strong>Tujuan:</strong> Melatih kekuatan kaki & keseimbangan</p>
+            <p><strong>Penjelasan:</strong> Tarik perhatian anak untuk berdiri di pegangan sofa/meja, lalu dorong langkah merambat ke samping.</p>
+            <div class="form-input">
+                <label for="activity1Level">Level Respons:</label>
+                <div class="level-radio-group">
+                    <label><input type="radio" name="activity1Level" value="1"> 1</label>
+                    <label><input type="radio" name="activity1Level" value="2"> 2</label>
+                    <label><input type="radio" name="activity1Level" value="3"> 3</label>
+                    <label><input type="radio" name="activity1Level" value="4"> 4</label>
+                    <label><input type="radio" name="activity1Level" value="5"> 5</label>
+                </div>
+                <label for="activity1Skor">Skor/Kuantitas:</label>
+                <input type="number" id="activity1Skor" value="0" min="0" placeholder="Contoh: 6 langkah merambat tanpa jatuh">
+                <label for="activity1Catatan">Catatan:</label>
+                <textarea id="activity1Catatan" rows="2" placeholder="Lihat apakah berani melepas pegangan sebentar."></textarea>
+            </div>
+        </div>
+
+        <div class="activity-card" id="activity2">
+            <h3>2. Merangkak Rintangan</h3>
+            <p><strong>Kategori:</strong> Motorik Kasar, Kognitif</p>
+            <p><strong>Tujuan:</strong> Koordinasi tubuh & pemecahan masalah</p>
+            <p><strong>Penjelasan:</strong> Susun bantal dan kotak sebagai rintangan untuk dilewati.</p>
+            <div class="form-input">
+                <label for="activity2Level">Level Respons:</label>
+                <div class="level-radio-group">
+                    <label><input type="radio" name="activity2Level" value="1"> 1</label>
+                    <label><input type="radio" name="activity2Level" value="2"> 2</label>
+                    <label><input type="radio" name="activity2Level" value="3"> 3</label>
+                    <label><input type="radio" name="activity2Level" value="4"> 4</label>
+                    <label><input type="radio" name="activity2Level" value="5"> 5</label>
+                </div>
+                <label for="activity2Skor">Skor/Kuantitas:</label>
+                <input type="number" id="activity2Skor" value="0" min="0" placeholder="Contoh: 3x lintas rintangan">
+                <label for="activity2Catatan">Catatan:</label>
+                <textarea id="activity2Catatan" rows="2" placeholder="Perhatikan cara dia mencari jalan termudah."></textarea>
+            </div>
+        </div>
+        
+        <div class="activity-card" id="activity3">
+            <h3>3. Latihan Makan Mandiri</h3>
+            <p><strong>Kategori:</strong> Motorik Halus, Kognitif</p>
+            <p><strong>Tujuan:</strong> Koordinasi tangan-mata, keterampilan makan</p>
+            <p><strong>Penjelasan:</strong> Berikan sendok kecil dengan bubur kental agar mudah diambil.</p>
+            <div class="form-input">
+                <label for="activity3Level">Level Respons:</label>
+                <div class="level-radio-group">
+                    <label><input type="radio" name="activity3Level" value="1"> 1</label>
+                    <label><input type="radio" name="activity3Level" value="2"> 2</label>
+                    <label><input type="radio" name="activity3Level" value="3"> 3</label>
+                    <label><input type="radio" name="activity3Level" value="4"> 4</label>
+                    <label><input type="radio" name="activity3Level" value="5"> 5</label>
+                </div>
+                <label for="activity3Skor">Skor/Kuantitas:</label>
+                <input type="number" id="activity3Skor" value="0" min="0" placeholder="Contoh: 5 sendok masuk mulut tanpa tumpah banyak">
+                <label for="activity3Catatan">Catatan:</label>
+                <textarea id="activity3Catatan" rows="2" placeholder="Catat ekspresi saat mencoba makanan baru."></textarea>
+            </div>
+        </div>
+
+        <div class="activity-card" id="activity4">
+            <h3>4. Main Tepuk Lagu</h3>
+            <p><strong>Kategori:</strong> Komunikasi, Sosial-Emosi</p>
+            <p><strong>Tujuan:</strong> Interaksi & bahasa awal</p>
+            <p><strong>Penjelasan:</strong> Nyanyikan lagu anak (“Cicak di Dinding”, “Pok Ame Ame”) sambil tepuk tangan berirama.</p>
+            <div class="form-input">
+                <label for="activity4Level">Level Respons:</label>
+                <div class="level-radio-group">
+                    <label><input type="radio" name="activity4Level" value="1"> 1</label>
+                    <label><input type="radio" name="activity4Level" value="2"> 2</label>
+                    <label><input type="radio" name="activity4Level" value="3"> 3</label>
+                    <label><input type="radio" name="activity4Level" value="4"> 4</label>
+                    <label><input type="radio" name="activity4Level" value="5"> 5</label>
+                </div>
+                <label for="activity4Skor">Skor/Kuantitas:</label>
+                <input type="number" id="activity4Skor" value="0" min="0" placeholder="Contoh: 3 gerakan tepuk mengikuti lagu">
+                <label for="activity4Catatan">Catatan:</label>
+                <textarea id="activity4Catatan" rows="2" placeholder="Apakah mencoba meniru kata atau suara."></textarea>
+            </div>
+        </div>
+
+        <div class="activity-card" id="activity5">
+            <h3>5. Buku Bergambar + Tunjuk</h3>
+            <p><strong>Kategori:</strong> Kognitif, Komunikasi</p>
+            <p><strong>Tujuan:</strong> Mengenal benda & kata</p>
+            <p><strong>Penjelasan:</strong> Tunjukkan gambar binatang, tanya “Mana kucingnya?” → Anak menunjuk.</p>
+            <div class="form-input">
+                <label for="activity5Level">Level Respons:</label>
+                <div class="level-radio-group">
+                    <label><input type="radio" name="activity5Level" value="1"> 1</label>
+                    <label><input type="radio" name="activity5Level" value="2"> 2</label>
+                    <label><input type="radio" name="activity5Level" value="3"> 3</label>
+                    <label><input type="radio" name="activity5Level" value="4"> 4</label>
+                    <label><input type="radio" name="activity5Level" value="5"> 5</label>
+                </div>
+                <label for="activity5Skor">Skor/Kuantitas:</label>
+                <input type="number" id="activity5Skor" value="0" min="0" placeholder="Contoh: 4/6 jawaban benar">
+                <label for="activity5Catatan">Catatan:</label>
+                <textarea id="activity5Catatan" rows="2" placeholder="Catat kata/ucapan baru yang muncul."></textarea>
+            </div>
+        </div>
+
+        <div class="activity-card" id="activity6">
+            <h3>6. Kontak Mata & Gesture</h3>
+            <p><strong>Kategori:</strong> Sosial-Emosi, Komunikasi</p>
+            <p><strong>Tujuan:</strong> Menghubungkan gesture dengan makna</p>
+            <p><strong>Penjelasan:</strong> Respon saat anak menunjuk, angkat tangan, atau menggeleng.</p>
+            <div class="form-input">
+                <label for="activity6Level">Level Respons:</label>
+                <div class="level-radio-group">
+                    <label><input type="radio" name="activity6Level" value="1"> 1</label>
+                    <label><input type="radio" name="activity6Level" value="2"> 2</label>
+                    <label><input type="radio" name="activity6Level" value="3"> 3</label>
+                    <label><input type="radio" name="activity6Level" value="4"> 4</label>
+                    <label><input type="radio" name="activity6Level" value="5"> 5</label>
+                </div>
+                <label for="activity6Skor">Skor/Kuantitas:</label>
+                <input type="number" id="activity6Skor" value="0" min="0" placeholder="Contoh: 2 gesture baru">
+                <label for="activity6Catatan">Catatan:</label>
+                <textarea id="activity6Catatan" rows="2" placeholder="Misal: menunjuk mainan → bilang “mau”."></textarea>
+            </div>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <button id="saveDataBtn" class="btn-primary flex-1 py-3 px-6 rounded-md text-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                <span class="mr-2">💾</span> Simpan Data & Perbarui Grafik
+            </button>
+            <button id="getSummaryBtn" class="btn-primary flex-1 py-3 px-6 rounded-md text-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                <span class="mr-2">✨</span> Dapatkan Ringkasan Harian
+            </button>
+            <button id="clearDataBtn" class="btn-danger flex-1 py-3 px-6 rounded-md text-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75">
+                <span class="mr-2">🗑️</span> Hapus Semua Data
+            </button>
+        </div>
+
+        <!-- AI Summary Output Area -->
+        <div id="aiSummaryOutput" class="mb-10">
+            <h3>Ringkasan Harian AI untuk M. Alfatih Raindra</h3>
+            <p id="summaryText">Ringkasan akan muncul di sini setelah Anda mengklik "Dapatkan Ringkasan Harian".</p>
+        </div>
+
+        <!-- Bagian Grafik -->
+        <div class="mb-10">
+            <h2 class="section-header p-4 text-xl font-semibold text-gray-800 rounded-tr-lg rounded-br-lg mb-6">📊 Grafik Perkembangan Level Respons</h2>
+            <!-- Date range pickers for the chart -->
+            <div class="chart-date-range-picker">
+                <label for="startDatePicker">Dari Tanggal:</label>
+                <input type="date" id="startDatePicker">
+                <label for="endDatePicker">Sampai Tanggal:</label>
+                <input type="date" id="endDatePicker">
+            </div>
+            <div class="activity-card p-5 rounded-lg min-h-[300px] lg:min-h-[400px] flex flex-col items-center justify-center">
+                <canvas id="developmentChart"></canvas>
+            </div>
+            <p class="text-sm text-gray-600 mt-4 text-center">Grafik ini menunjukkan Level Respons (1-5) anak Anda untuk setiap aktivitas dari waktu ke waktu. (1 = sangat sulit/butuh bantuan penuh, 5 = mudah/mandiri)</p>
+        </div>
+
+    </div>
+
+    <!-- Custom Message Box HTML -->
+    <div id="messageBoxOverlay" class="message-box-overlay">
+        <div class="message-box-content">
+            <h3 id="messageBoxTitle"></h3>
+            <p id="messageBoxText"></p>
+            <div class="message-box-actions" id="messageBoxActions">
+                <!-- Buttons will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay HTML -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader"></div>
+        <p class="loading-text">Membuat ringkasan...</p>
+    </div>
+
+    <script>
+        let myChart; // Variable to hold the Chart.js instance
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Retrieve __app_id and __firebase_config from global scope (if available)
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+            // DOM Elements
+            const recordDateInput = document.getElementById('recordDate');
+            const saveDataBtn = document.getElementById('saveDataBtn');
+            const getSummaryBtn = document.getElementById('getSummaryBtn');
+            const clearDataBtn = document.getElementById('clearDataBtn');
+            const aiSummaryOutput = document.getElementById('aiSummaryOutput');
+            const summaryText = document.getElementById('summaryText');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const messageBoxOverlay = document.getElementById('messageBoxOverlay');
+            const messageBoxTitle = document.getElementById('messageBoxTitle');
+            const messageBoxText = document.getElementById('messageBoxText');
+            const messageBoxActions = document.getElementById('messageBoxActions');
+
+            // Set default date to today
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            recordDateInput.value = `${year}-${month}-${day}`;
+
+            // Define all activities with their IDs, names, categories, and purposes
+            // Mapped to the new list provided by the user.
+            const allActivityTypes = [
+                { id: "activity1", name: "Latihan Berdiri & Merambat", category: "Motorik Kasar, Sensoris Integrasi", purpose: "Melatih kekuatan kaki & keseimbangan" },
+                { id: "activity2", name: "Merangkak Rintangan", category: "Motorik Kasar, Kognitif", purpose: "Koordinasi tubuh & pemecahan masalah" },
+                { id: "activity3", name: "Latihan Makan Mandiri", category: "Motorik Halus, Kognitif", purpose: "Koordinasi tangan-mata, keterampilan makan" },
+                { id: "activity4", name: "Main Tepuk Lagu", category: "Komunikasi, Sosial-Emosi", purpose: "Interaksi & bahasa awal" },
+                { id: "activity5", name: "Buku Bergambar + Tunjuk", category: "Kognitif, Komunikasi", purpose: "Mengenal benda & kata" },
+                { id: "activity6", name: "Kontak Mata & Gesture", category: "Sosial-Emosi, Komunikasi", purpose: "Menghubungkan gesture dengan makna" }
+            ];
+
+            // Define colors for each activity's line in the chart
+            const activityColors = [
+                '#3b82f6', // blue-500
+                '#16a34a', // green-600
+                '#f59e0b', // yellow-500
+                '#8b5cf6', // purple-500
+                '#ec4899', // pink-500
+                '#f97316'  // orange-500
+            ];
+
+            // --- CUSTOM MESSAGE BOX FUNCTIONS ---
+            const showMessageBox = (title, message, type, callback = null) => {
+                messageBoxTitle.textContent = title;
+                messageBoxText.textContent = message;
+                messageBoxActions.innerHTML = ''; // Clear previous buttons
+
+                if (type === 'alert') {
+                    const okBtn = document.createElement('button');
+                    okBtn.textContent = 'OK';
+                    okBtn.classList.add('ok-btn');
+                    okBtn.onclick = () => messageBoxOverlay.classList.remove('active');
+                    messageBoxActions.appendChild(okBtn);
+                } else if (type === 'confirm') {
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.textContent = 'Ya';
+                    confirmBtn.classList.add('confirm-btn');
+                    confirmBtn.onclick = () => {
+                        messageBoxOverlay.classList.remove('active');
+                        if (callback) callback(true);
+                    };
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.textContent = 'Tidak';
+                    cancelBtn.classList.add('cancel-btn');
+                    cancelBtn.onclick = () => {
+                        messageBoxOverlay.classList.remove('active');
+                        if (callback) callback(false);
+                    };
+                    messageBoxActions.appendChild(confirmBtn);
+                    messageBoxActions.appendChild(cancelBtn);
+                }
+                messageBoxOverlay.classList.add('active');
+            };
+
+            // --- LOADING INDICATOR FUNCTIONS ---
+            const showLoading = (message = "Memuat...") => {
+                loadingOverlay.querySelector('.loading-text').textContent = message;
+                loadingOverlay.classList.add('active');
+            };
+
+            const hideLoading = () => {
+                loadingOverlay.classList.remove('active');
+            };
+
+            // --- FUNCTIONS FOR LOCAL STORAGE ---
+
+            // Loads data for the currently selected date, if available
+            const loadDataForCurrentDate = () => {
+                const storedData = getStoredData();
+                const currentDate = recordDateInput.value;
+                const dailyEntry = storedData.find(entry => entry.date === currentDate);
+
+                allActivityTypes.forEach(activityMeta => {
+                    const scoreInput = document.getElementById(`${activityMeta.id}Skor`);
+                    const notesTextarea = document.getElementById(`${activityMeta.id}Catatan`);
+                    const levelRadios = document.querySelectorAll(`input[name="${activityMeta.id}Level"]`);
+
+                    const activityData = dailyEntry ? dailyEntry.activities.find(a => a.id === activityMeta.id) : null;
+
+                    if (scoreInput) scoreInput.value = activityData ? activityData.score || '' : '';
+                    if (notesTextarea) notesTextarea.value = activityData ? activityData.notes || '' : '';
+                    if (levelRadios) {
+                        levelRadios.forEach(radio => {
+                            radio.checked = (activityData && radio.value === activityData.level);
+                        });
+                    }
+                });
+
+                // Hide summary output when date changes
+                aiSummaryOutput.style.display = 'none';
+                summaryText.textContent = 'Ringkasan akan muncul di sini setelah Anda mengklik "Dapatkan Ringkasan Harian".';
+            };
+
+            // Saves the current form data to local storage
+            const saveDataToLocalStorage = () => {
+                const recordDate = recordDateInput.value;
+                const dailyActivitiesData = [];
+
+                // Collect data for all activities
+                let validationFailed = false;
+                allActivityTypes.forEach(item => {
+                    if (validationFailed) return; // Stop if previous validation failed
+
+                    const scoreInput = document.getElementById(`${item.id}Skor`);
+                    const notesTextarea = document.getElementById(`${item.id}Catatan`);
+                    const levelRadios = document.querySelectorAll(`input[name="${item.id}Level"]`);
+
+                    const score = scoreInput ? parseInt(scoreInput.value) : 0;
+                    const level = getRadioValue(`${item.id}Level`);
+                    const notes = notesTextarea ? notesTextarea.value.trim() : '';
+
+                    // Input validation for level
+                    if (!level) {
+                        showMessageBox('Validasi Data', `Mohon pilih Level Respons untuk "${item.name}".`, 'alert');
+                        validationFailed = true;
+                        return; 
+                    }
+                    if (score < 0) {
+                        showMessageBox('Validasi Data', `Skor/Kuantitas untuk "${item.name}" tidak boleh negatif.`, 'alert');
+                        validationFailed = true;
+                        return;
+                    }
+                    if (parseInt(level) < 1 || parseInt(level) > 5) {
+                        showMessageBox('Validasi Data', `Level Respons untuk "${item.name}" harus antara 1 dan 5.`, 'alert');
+                        validationFailed = true;
+                        return;
+                    }
+
+                    dailyActivitiesData.push({
+                        id: item.id,
+                        name: item.name,
+                        category: item.category,
+                        purpose: item.purpose,
+                        score: score,
+                        level: level,
+                        notes: notes
+                    });
+                });
+
+                if (validationFailed) return; // Exit if any validation failed
+
+                let storedData = getStoredData();
+
+                // Find if an entry for this date already exists
+                const existingIndex = storedData.findIndex(entry => entry.date === recordDate);
+
+                if (existingIndex > -1) {
+                    // Update existing entry
+                    storedData[existingIndex].activities = dailyActivitiesData;
+                } else {
+                    // Add new entry
+                    storedData.push({ date: recordDate, activities: dailyActivitiesData });
+                }
+
+                // Sort data by date to ensure chart display is chronological
+                storedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                localStorage.setItem('childDevelopmentData', JSON.stringify(storedData));
+                showMessageBox('Data Tersimpan', 'Data harian berhasil disimpan!', 'alert');
+                renderChart(); // Re-render chart after saving
+            };
+
+            // Retrieves all data from local storage
+            const getStoredData = () => {
+                const data = localStorage.getItem('childDevelopmentData');
+                return data ? JSON.parse(data) : [];
+            };
+
+            // Clears all form fields
+            const clearForm = () => {
+                allActivityTypes.forEach(activityMeta => {
+                    const scoreInput = document.getElementById(`${activityMeta.id}Skor`);
+                    const notesTextarea = document.getElementById(`${activityMeta.id}Catatan`);
+                    const levelRadios = document.querySelectorAll(`input[name="${activityMeta.id}Level"]`);
+                    
+                    if (scoreInput) scoreInput.value = '0';
+                    if (notesTextarea) notesTextarea.value = '';
+                    if (levelRadios) {
+                        levelRadios.forEach(radio => radio.checked = false);
+                    }
+                });
+            };
+
+            // --- FUNCTIONS FOR CHARTING ---
+
+            const renderChart = () => {
+                const storedData = getStoredData();
+                const ctx = document.getElementById('developmentChart').getContext('2d');
+
+                // Destroy existing chart instance if it exists
+                if (myChart) {
+                    myChart.destroy();
+                }
+
+                if (storedData.length === 0) {
+                    // Display message if no data
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear canvas
+                    ctx.font = '16px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#666'; // Gray text for clarity
+                    ctx.fillText('Belum ada data untuk ditampilkan. Isi formulir dan simpan!', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    return;
+                }
+
+                // Prepare data for Chart.js
+                // Filter storedData by date range if start/end date pickers are active
+                const startDatePicker = document.getElementById('startDatePicker');
+                const endDatePicker = document.getElementById('endDatePicker');
+                const startDate = startDatePicker && startDatePicker.value ? new Date(startDatePicker.value + 'T00:00:00') : null;
+                const endDate = endDatePicker && endDatePicker.value ? new Date(endDatePicker.value + 'T23:59:59') : null;
+
+                const filteredStoredData = storedData.filter(entry => {
+                    const entryDate = new Date(entry.date + 'T00:00:00');
+                    return (!startDate || entryDate >= startDate) && (!endDate || entryDate <= endDate);
+                });
+
+                const labels = filteredStoredData.map(entry => {
+                    const dateParts = entry.date.split('-');
+                    return `${dateParts[2]}/${dateParts[1]}`; // Format as DD/MM
+                }); // Dates for X-axis
+
+                const datasets = [];
+                let colorCounter = 0; // Use a counter for activityColors
+
+                allActivityTypes.forEach(activityMeta => {
+                    const dataPoints = filteredStoredData.map(dailyEntry => {
+                        const activity = dailyEntry.activities.find(a => a.id === activityMeta.id);
+                        // Use level for the graph, parse to int. Null if no data or invalid level.
+                        return activity && activity.level ? parseInt(activity.level) : null;
+                    });
+
+                    // Only add dataset if there's at least one valid data point
+                    if (dataPoints.some(point => point !== null)) {
+                        const baseColor = activityColors[colorCounter % activityColors.length];
+                        
+                        datasets.push({
+                            label: activityMeta.name,
+                            data: dataPoints,
+                            backgroundColor: baseColor, // Set point background color (for scatter/line)
+                            borderColor: baseColor,
+                            borderWidth: 2, // Thicker lines
+                            fill: false,    // Do not fill area under the line
+                            tension: 0.1,   // Slight curve to lines
+                            pointRadius: 5, // Larger points
+                            pointBackgroundColor: baseColor,
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 7
+                        });
+                        colorCounter++; // Increment color counter for the next activity
+                    }
+                });
+
+                myChart = new Chart(ctx, {
+                    type: 'line', // Set chart type to 'line' as requested
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Perkembangan Level Respons Anak (Grafik Garis)', // Updated title for line chart
+                                font: {
+                                    size: 18,
+                                    family: "Inter"
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index', // Show tooltip for all lines on a specific date
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += `Level ${context.parsed.y}`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        family: "Inter"
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Tanggal',
+                                    font: {
+                                        family: "Inter"
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Level Respons (1 = Sulit, 5 = Mudah)',
+                                    font: {
+                                        family: "Inter"
+                                    }
+                                },
+                                beginAtZero: false, // Important for showing variations in 1-5 range
+                                min: 1, // Minimum value on Y-axis
+                                max: 5, // Maximum value on Y-axis
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value, index, values) {
+                                        if (value === 1) return '1 (Sulit)';
+                                        if (value === 5) return '5 (Mudah)';
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            // Function to get selected radio button value
+            function getRadioValue(name) {
+                const radios = document.querySelectorAll(`input[name="${name}"]:checked`);
+                return radios.length > 0 ? radios[0].value : '';
+            }
+
+            // --- GEMINI API INTEGRATION ---
+
+            // Exponential backoff retry function
+            async function fetchWithExponentialBackoff(url, options, retries = 3, delay = 1000) {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, options);
+                        if (!response.ok) {
+                            // If response is not OK, it might be a rate limit or other server error
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response;
+                    } catch (error) {
+                        if (i < retries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                        } else {
+                            throw error; // Re-throw error if max retries reached
+                        }
+                    }
+                }
+            }
+
+            const getDailySummary = async () => {
+                showLoading('Membuat ringkasan harian... Mohon tunggu.');
+                aiSummaryOutput.style.display = 'block'; // Ensure summary area is visible
+                summaryText.textContent = 'Memuat ringkasan...';
+
+                const recordDate = recordDateInput.value;
+                const storedData = getStoredData();
+                const dailyEntry = storedData.find(entry => entry.date === recordDate);
+
+                // Update the prompt to use M. Alfatih Raindra's data and current activity labels
+                const childName = "M. Alfatih Raindra";
+                const childAge = "15 bulan";
+                const childGender = "Laki-laki";
+                const childDiagnosis = "Tidak ada, perkembangan wajar";
+                const childFocusStimulation = "Motorik kasar, motorik halus, bahasa awal, makan mandiri, interaksi sosial";
+
+                if (!dailyEntry || dailyEntry.activities.every(activity => !activity.notes && !activity.score && !activity.level)) {
+                    summaryText.textContent = `Tidak ada catatan yang tersedia untuk tanggal ${recordDate}. Silakan isi data terlebih dahulu.`;
+                    hideLoading();
+                    return;
+                }
+
+                let promptNotes = "";
+                dailyEntry.activities.forEach(activity => {
+                    const notes = activity.notes ? `Catatan: ${activity.notes}` : '';
+                    const score = activity.score !== null && activity.score !== undefined ? `Skor/Kuantitas: ${activity.score}` : '';
+                    const level = activity.level ? `Level Respons: ${activity.level}` : '';
+
+                    if (notes || score || level) {
+                        promptNotes += `\n- ${activity.name}:\n`;
+                        if (level) promptNotes += `  Level: ${level}\n`;
+                        if (score) promptNotes += `  Skor: ${score}\n`;
+                        if (notes) promptNotes += `  Catatan: ${notes}\n`;
+                    }
+                });
+
+                if (!promptNotes.trim()) {
+                    summaryText.textContent = `Tidak ada catatan detail yang tersedia untuk tanggal ${recordDate}. Silakan isi data terlebih dahulu.`;
+                    hideLoading();
+                    return;
+                }
+
+                const prompt = `Berikut adalah catatan harian observasi perkembangan anak pada tanggal ${recordDate}. Mohon berikan ringkasan singkat (maksimal 3-4 kalimat) dan poin-poin penting dari observasi ini, fokus pada kemajuan, tantangan, dan pola yang terlihat terkait dengan perkembangan anak.
+Nama anak: ${childName}, Usia: ${childAge}, Jenis Kelamin: ${childGender}, Diagnosis: ${childDiagnosis}, Fokus Stimulasi: ${childFocusStimulation}.
+Catatan observasi:\n${promptNotes.trim()}`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // If you want to use models other than gemini-2.5-flash-preview-05-20 or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetchWithExponentialBackoff(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        summaryText.textContent = text;
+                    } else {
+                        summaryText.textContent = 'Maaf, tidak dapat menghasilkan ringkasan. Struktur respons API tidak terduga.';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    summaryText.textContent = `Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi. (${error.message})`;
+                } finally {
+                    hideLoading();
+                }
+            };
+
+            // --- EVENT LISTENERS ---
+
+            saveDataBtn.addEventListener('click', saveDataToLocalStorage);
+            getSummaryBtn.addEventListener('click', getDailySummary); // Event listener for new button
+
+            clearDataBtn.addEventListener('click', () => {
+                showMessageBox(
+                    'Konfirmasi Hapus Data',
+                    'Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak bisa dibatalkan.',
+                    'confirm',
+                    (result) => {
+                        if (result) {
+                            localStorage.removeItem('childDevelopmentData');
+                            showMessageBox('Data Dihapus', 'Semua data telah dihapus.', 'alert');
+                            clearForm();
+                            renderChart(); // Clear the chart
+                            aiSummaryOutput.style.display = 'none'; // Hide summary
+                            summaryText.textContent = 'Ringkasan akan muncul di sini setelah Anda mengklik "Dapatkan Ringkasan Harian".';
+                        }
+                    }
+                );
+            });
+
+            // Load data and render chart when the date input changes or on initial load
+            recordDateInput.addEventListener('change', loadDataForCurrentDate);
+
+            // Event listeners for chart date range pickers
+            const startDatePicker = document.getElementById('startDatePicker');
+            const endDatePicker = document.getElementById('endDatePicker');
+            
+            // Add null checks before adding event listeners
+            if (startDatePicker) {
+                startDatePicker.addEventListener('change', renderChart); 
+            } else {
+                console.error('Elemen dengan ID "startDatePicker" tidak ditemukan. Pastikan ID HTML sudah benar.');
+            }
+
+            if (endDatePicker) {
+                endDatePicker.addEventListener('change', renderChart); 
+            } else {
+                console.error('Elemen dengan ID "endDatePicker" tidak ditemukan. Pastikan ID HTML sudah benar.');
+            }
+
+            // Initial load and render
+            loadDataForCurrentDate();
+            renderChart();
+        });
+    </script>
+</body>
+</html>
